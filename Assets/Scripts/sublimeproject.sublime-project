@@ -1,0 +1,13 @@
+{
+	"folders":
+	[
+		{
+			"path": "C:\\Users\\Johan\\Desktop\\2Dtransportgame\\Transport2D\\Assets\\Scripts",
+			"file_exclude_patterns":
+			[
+				"*.dll",
+				"*.meta"
+			]
+		}
+	]
+}
