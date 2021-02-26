@@ -48,11 +48,18 @@ public class PointCreator
         PointCreator pointCreator = new PointCreator();
         int numberOfPoints = (int)Mathf.Ceil((begin - end).magnitude * 10);
         pointCreator.points = new Vector2[numberOfPoints+1];
+        pointCreator.tangents = new Vector2[numberOfPoints+1];
         for (int i = 0; i <= numberOfPoints; i++)
         {
             float t =(float)i/(float)numberOfPoints;
             pointCreator.points[i]=BezierCurve(begin,end,beginTangent,endTangent,t);
         }
+        for (int i = 1; i < numberOfPoints; i++)
+        {
+            pointCreator.tangents[i]=(pointCreator.points[i+1]-pointCreator.points[i-1]).normalized;
+        }
+        pointCreator.tangents[0] = beginTangent.normalized;
+        pointCreator.tangents[numberOfPoints] = endTangent.normalized;
         return pointCreator;
     }
     private static PointCreator StraightTwoPoints(Vector2 begin, Vector2 end)
@@ -208,14 +215,13 @@ public class PointCreator
         Vector2 c = end -endTangent.normalized*(end-begin).magnitude/2;
         Vector2 d = end;
         DebugUtil debugUtil = GameObject.FindObjectOfType<DebugUtil>();
-        if(t==0){
+        /*if(t==0){
         debugUtil.Markpoint(a,Color.red);
         debugUtil.Markpoint(b,Color.blue);
         debugUtil.Markpoint(c,Color.green);
         debugUtil.Markpoint(d,Color.yellow);
-        }
+        }*/
 
         return (1-t)*(1-t)*(1-t)*a+3*(1-t)*(1-t)*t*b+3*(1-t)*t*t*c+t*t*t*d;
-
-    }
+    }    
 }
