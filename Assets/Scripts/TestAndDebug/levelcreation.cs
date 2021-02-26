@@ -24,21 +24,34 @@ public class levelcreation : MonoBehaviour
         Track track6 = Track.newTrack(PointCreator.create(point6, point7,track5.lastTangent));
         Track track7 = Track.newTrack(PointCreator.create(point7, point8,track6.lastTangent));
         Track track8 = Track.newTrack(PointCreator.create(point8, point1,track7.lastTangent));
+
         var point11 = new Vector2(1000,0);
 		var point12 = new Vector2(1100,0);
 		var point13 = new Vector2(1100,100);
 		var point14 = new Vector2(1000,100);
 
+		var point15 = new Vector2(1050,50);
+
+        float c = -50;
+        var point20 = new Vector2(1000,c);
+		var point21 = new Vector2(1300,c);
+
         Track track11 = Track.newTrack(PointCreator.create(point11, point12));
         Track track12 = Track.newTrack(PointCreator.create(point12, point13,track11.lastTangent));
         Track track13 = Track.newTrack(PointCreator.create(point13, point14,track12.lastTangent));
         Track track14 = Track.newTrack(PointCreator.create(point14, point11,track13.lastTangent));
+        Track track15 = Track.newTrack(PointCreator.create(point15,point11,endTangent: track11.firstTangent));
+        Track track16 = Track.newTrack(PointCreator.create(point15,point13,beginTangent: -track15.firstTangent, endTangent: -track12.firstTangent));
+
+
+        Track track20 = Track.newTrack(PointCreator.create(point20,point21));
+        Debug.Log(track11.firstTangent);
+        Track track21 = Track.newTrack(PointCreator.create(point11,point21,track11.firstTangent,track20.lastTangent));
 
         foreach (var item in worlddata.tracks)
         {
             var a = item.ConnectionsBegin;
             var b = item.ConnectionsEnd;
-
         }
     }
 

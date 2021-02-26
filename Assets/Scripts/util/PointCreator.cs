@@ -14,9 +14,27 @@ public class PointCreator
     public static float maxLength = 10000f;
 
     public static PointCreator create(Vector2 begin,Vector2 end,Vector2? beginTangent = null,Vector2? endTangent = null){
+        if (beginTangent.HasValue && endTangent.HasValue){
+            return bezierCurvePC(begin,end,beginTangent.Value,endTangent.Value);
+        }
+        if (endTangent.HasValue){
+            if (Util.sameDirection((end-begin),-endTangent.Value,5)){
+                return StraightTwoPoints(begin ,end);
+            }
+
+            PointCreator pc = CircleTwoPointsBeginTangent(end,begin, endTangent.Value);
+            System.Array.Reverse(pc.points);
+            System.Array.Reverse(pc.tangents);
+            for (int i = 0; i < pc.tangents.Length; i++)
+            {
+                pc.tangents[i] = - pc.tangents[i];
+            }
+            return pc;
+        }
+
         if (beginTangent.HasValue){
             //too straight for curve
-            if (Util.sameDirection((begin-end),beginTangent.Value,5)){
+            if (Util.sameDirection((end-begin),beginTangent.Value,5)){
                 return StraightTwoPoints(begin ,end);
             }
             return CircleTwoPointsBeginTangent(begin, end, beginTangent.Value);
@@ -26,7 +44,18 @@ public class PointCreator
         }
     }
 
-    public static PointCreator StraightTwoPoints(Vector2 begin, Vector2 end)
+    private static PointCreator bezierCurvePC(Vector2 begin,Vector2 end,Vector2 beginTangent,Vector2 endTangent){
+        PointCreator pointCreator = new PointCreator();
+        int numberOfPoints = (int)Mathf.Ceil((begin - end).magnitude * 10);
+        pointCreator.points = new Vector2[numberOfPoints+1];
+        for (int i = 0; i <= numberOfPoints; i++)
+        {
+            float t =(float)i/(float)numberOfPoints;
+            pointCreator.points[i]=BezierCurve(begin,end,beginTangent,endTangent,t);
+        }
+        return pointCreator;
+    }
+    private static PointCreator StraightTwoPoints(Vector2 begin, Vector2 end)
     {
         PointCreator pointCreator = new PointCreator();
 
@@ -58,15 +87,15 @@ public class PointCreator
         pointCreator.tangents = new Vector2[numberOfPoints];
         for (int i = 0; i < numberOfPoints; i++)
         {
-            pointCreator.tangents[i] = new Vector2(begin.x - end.x, begin.y - end.y);
+            pointCreator.tangents[i] = (end-begin).normalized;
         }
         return pointCreator;
 
     }
-    public static PointCreator CircleTwoPointsBeginTangent(Vector2 begin, Vector2 end, Vector2 beginTangent)
+    private static PointCreator CircleTwoPointsBeginTangent(Vector2 begin, Vector2 end, Vector2 beginTangent)
     {
         PointCreator pointCreator = new PointCreator();
-
+        beginTangent = - beginTangent;
         Vector2 middlePoint = lineLineIntersection(begin, Vector2.Perpendicular(beginTangent), 0.5f * begin + 0.5f * end, Vector2.Perpendicular(end - begin));
 
         float radius = (middlePoint - begin).magnitude;
@@ -157,7 +186,7 @@ public class PointCreator
         }
         float sin = Mathf.Sin(currentangle);
         float cos = Mathf.Cos(currentangle);
-        return -new Vector2(cos, sin);
+        return new Vector2(cos, sin);
     }
 
     //doesnt check if there is an intersection first
@@ -171,5 +200,22 @@ public class PointCreator
 
         float t = ((a.x - c.x) * (c.y - d.y) - (a.y - c.y) * (c.x - d.x)) / ((a.x - b.x) * (c.y - d.y) - (a.y - b.y) * (c.x - d.x));
         return new Vector2(a.x + t * at.x, a.y + t * at.y);
+    }
+
+    private static Vector2 BezierCurve(Vector2 begin,Vector2 end,Vector2 beginTangent,Vector2 endTangent, float t){
+        Vector2 a = begin;
+        Vector2 b = begin+beginTangent.normalized*(end-begin).magnitude/2;
+        Vector2 c = end -endTangent.normalized*(end-begin).magnitude/2;
+        Vector2 d = end;
+        DebugUtil debugUtil = GameObject.FindObjectOfType<DebugUtil>();
+        if(t==0){
+        debugUtil.Markpoint(a,Color.red);
+        debugUtil.Markpoint(b,Color.blue);
+        debugUtil.Markpoint(c,Color.green);
+        debugUtil.Markpoint(d,Color.yellow);
+        }
+
+        return (1-t)*(1-t)*(1-t)*a+3*(1-t)*(1-t)*t*b+3*(1-t)*t*t*c+t*t*t*d;
+
     }
 }

@@ -29,7 +29,9 @@ public class Util{
         return ret;
     }
 
-    static public bool sameDirection(Vector2 v1,Vector2 v2, float degree){
+    static public bool sameDirection(Vector2 v1,Vector2 v2, float degree)
+    {
+        Debug.Log(Vector2.SignedAngle(v1,v2));
         return Mathf.Abs( Vector2.SignedAngle(v1,v2))<degree;
     }  
 }
