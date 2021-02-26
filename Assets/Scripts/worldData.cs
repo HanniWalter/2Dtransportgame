@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class worldData : MonoBehaviour
+public class WorldData : MonoBehaviour
 {
-    public List<Station> stations; 
     public List<Track> tracks;
-
+    
     // Start is called before the first frame update
     void Start()
     {
