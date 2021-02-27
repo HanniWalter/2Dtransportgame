@@ -6,6 +6,7 @@ public class WorldData : MonoBehaviour
 {
     public List<Track> tracks;
     public List<Stop> stops;
+    public List<Train> trains;
     
     // Start is called before the first frame update
     void Start()

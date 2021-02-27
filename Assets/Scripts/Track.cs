@@ -7,8 +7,8 @@ public class Track : WorldObject
     private static int _num = 0;
     private List<Track> TracksConnectedStart;
     private List<Track> TracksConnectedEnd;
-    [SerializeField] private Vector2[] points;
-    [SerializeField] private Vector2[] tangents;
+    [SerializeField] public Vector2[] points;
+    [SerializeField] public Vector2[] tangents;
 
     public Vector2 firstPoint{
         get

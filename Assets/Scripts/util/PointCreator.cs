@@ -102,14 +102,14 @@ public class PointCreator
     private static PointCreator CircleTwoPointsBeginTangent(Vector2 begin, Vector2 end, Vector2 beginTangent)
     {
         PointCreator pointCreator = new PointCreator();
-        beginTangent = - beginTangent;
+        //beginTangent = - beginTangent;
         Vector2 middlePoint = lineLineIntersection(begin, Vector2.Perpendicular(beginTangent), 0.5f * begin + 0.5f * end, Vector2.Perpendicular(end - begin));
 
         float radius = (middlePoint - begin).magnitude;
         float startAngle = Mathf.Atan2(begin.y - middlePoint.y, begin.x - middlePoint.x);
         float endAngle = Mathf.Atan2(end.y - middlePoint.y, end.x - middlePoint.x);
 
-        bool clockwise = (Vector2.SignedAngle((begin - middlePoint), (beginTangent))>0);
+        bool clockwise = (Vector2.SignedAngle((begin - middlePoint), (beginTangent))<0);
         if (!clockwise)
         {
             if (startAngle > endAngle)

@@ -73,9 +73,5 @@ public class Stop : WorldObject
     void draw(){
         SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Circle");
-        //SpriteRenderer.sprite
-        
-        //lineRenderer.positionCount = points.Length;
-        //lineRenderer.SetPositions(Util.toV3A(points));
     }
 }

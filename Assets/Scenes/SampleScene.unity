@@ -2077,6 +2077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tracks: []
   stops: []
+  trains: []
 --- !u!4 &1876129879
 Transform:
   m_ObjectHideFlags: 0
