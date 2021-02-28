@@ -46,7 +46,6 @@ public class levelcreation : MonoBehaviour
         Track track15 = Track.newTrack(PointCreator.create(point15,point11,endTangent: track11.firstTangent));
         Track track16 = Track.newTrack(PointCreator.create(point15,point13,beginTangent: -track15.firstTangent, endTangent: -track13.firstTangent));
 
-
         Track track20 = Track.newTrack(PointCreator.create(point20,point21));
         Track track21 = Track.newTrack(PointCreator.create(point11,point21,track11.firstTangent,track20.lastTangent));
         Track track22 = Track.newTrack(PointCreator.create(point21,point22,track20.lastTangent));
@@ -57,6 +56,7 @@ public class levelcreation : MonoBehaviour
 
         Stop stop1 = Stop.newStop(point12);
         Stop stop2 = Stop.newStop(point23);
+        Stop stop3 = Stop.newStop(point1);
 
         foreach (var item in worlddata.tracks)
         {
@@ -69,7 +69,7 @@ public class levelcreation : MonoBehaviour
         }
 
       
-        Train train1 = Train.newTrain(track12,50);
+        Train train1 = Train.newTrain(track12,50,false);
         train1.stops.Add(stop1);
         train1.stops.Add(stop2);
     }

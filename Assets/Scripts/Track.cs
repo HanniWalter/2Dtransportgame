@@ -4,6 +4,27 @@ using UnityEngine;
 
 public class Track : WorldObject
 {
+    public void debug(){
+        Debug.Log(gameObject.name);
+        Debug.Log( Lenght);
+    }
+
+    private float _lenght = 0;
+    public float Lenght{
+        get{
+            if (_lenght != 0){
+                return _lenght;
+            }else{
+                _lenght = 0;
+                for (int i = 0; i < points.Length-1; i++)
+                {
+                    _lenght +=(points[i] -points[i+1]).magnitude;
+                }
+                return _lenght;
+            }
+        }
+    }
+
     private static int _num = 0;
     private List<Track> TracksConnectedStart;
     private List<Track> TracksConnectedEnd;
@@ -88,6 +109,7 @@ public class Track : WorldObject
         ret.points = points;
         ret.tangents = tangents;
         
+
 		return ret;
     }
 
@@ -103,6 +125,7 @@ public class Track : WorldObject
     void Start()
     {
         draw();
+        debug();
     }
 
     // Update is called once per frame
