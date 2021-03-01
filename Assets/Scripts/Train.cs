@@ -79,8 +79,7 @@ public class Train : WorldObject
         direction = track.tangents[indexTrack];
 
         if (location == stops[indexStops].location && direction == stops[indexStops].direction ||location == stops[indexStops].location && direction == -stops[indexStops].direction){
-            Debug.Log("arrived at: ");
-            Debug.Log(stops[indexStops].name);
+            Debug.Log("arrived at: "+stops[indexStops].name);
             indexStops = indexStops +1;
         }
         drive(Time.deltaTime* 40);
@@ -106,7 +105,6 @@ public class Train : WorldObject
                 findPath();
             }
             if (path.Count==0){
-                Debug.Log("noPath");
                 return;
             }
             track = path[0].Item1;
