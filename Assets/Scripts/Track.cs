@@ -4,12 +4,9 @@ using UnityEngine;
 
 public class Track : WorldObject
 {
-    public void debug(){
-        Debug.Log(gameObject.name);
-        Debug.Log( Lenght);
-    }
 
-    private float _lenght = 0;
+
+    [SerializeField] private float _lenght = 0;
     public float Lenght{
         get{
             if (_lenght != 0){
@@ -125,7 +122,6 @@ public class Track : WorldObject
     void Start()
     {
         draw();
-        debug();
     }
 
     // Update is called once per frame

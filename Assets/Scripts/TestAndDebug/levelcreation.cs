@@ -69,7 +69,7 @@ public class levelcreation : MonoBehaviour
         }
 
       
-        Train train1 = Train.newTrain(track12,50,false);
+        Train train1 = Train.newTrain(track12,50,true);
         train1.stops.Add(stop1);
         train1.stops.Add(stop2);
     }

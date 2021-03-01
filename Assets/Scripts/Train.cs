@@ -5,18 +5,19 @@ using UnityEngine;
 public class Train : WorldObject
 {
     private static int _num = 0;
-    Track track;
-    int indexTrack;
-    int _indexStops = 0;
-    bool TrackDirection;
+    [SerializeField] Track track;
+    [SerializeField] int indexTrack;
+    [SerializeField] int _indexStops = 0;
+    [SerializeField] bool TrackDirection;
 
-    Vector2[] path = null;
+    List<(Track,bool)> path = new List<(Track, bool)>();
+    //[SerializeField] List<Track> _path = new List<Track>();
     int indexStops{
         get{
             return _indexStops;
         }
         set{
-            _indexStops = value % stops.Count;
+            _indexStops = (value % stops.Count);
         }
     }  
     
@@ -29,12 +30,21 @@ public class Train : WorldObject
         }
     }
     
-    public float direction{
+    public float directionAngle{
         get{
             return transform.eulerAngles.z;
         }
         set{
             transform.eulerAngles = new Vector3(0,0,value);
+        }
+    }
+
+    public Vector2 direction{
+        get{
+            return new Vector2(Mathf.Cos(transform.eulerAngles.z*Mathf.Deg2Rad),Mathf.Sin(transform.eulerAngles.z*Mathf.Deg2Rad)).normalized;
+        }
+        set{
+            transform.eulerAngles = new Vector3(0,0,Mathf.Atan2(value.y,value.x)*Mathf.Rad2Deg);
         }
     }
     public List<Stop> stops = new List<Stop>();
@@ -60,20 +70,79 @@ public class Train : WorldObject
     void Start()
     {
         draw();
-        findPath();
     }
 
     // Update is called once per frame
     void Update()
     {
         location = track.points[indexTrack];
-        direction = Mathf.Atan2(track.tangents[indexTrack].y,track.tangents[indexTrack].x)*Mathf.Rad2Deg;
+        direction = track.tangents[indexTrack];
+
+        if (location == stops[indexStops].location && direction == stops[indexStops].direction ||location == stops[indexStops].location && direction == -stops[indexStops].direction){
+            Debug.Log("arrived at: ");
+            Debug.Log(stops[indexStops].name);
+            indexStops = indexStops +1;
+        }
+        drive(Time.deltaTime* 40);
+       
+        /*_path  = new List<Track>();
+        foreach(var item in path)
+        {
+            _path.Add(item.Item1);
+        }*/
     }
 
     void draw(){
         gameObject.AddComponent<SpriteRenderer>();
+        gameObject.transform.localScale *= 3; 
         SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Square");
+    }
+
+
+    void drive(float distance){
+        if (indexTrack==track.points.Length-1 && TrackDirection || indexTrack==0 && !TrackDirection){
+            if(path.Count == 0){
+                findPath();
+            }
+            if (path.Count==0){
+                Debug.Log("noPath");
+                return;
+            }
+            track = path[0].Item1;
+            TrackDirection = path[0].Item2;
+            indexTrack=0;
+            path.RemoveAt(0);
+            /*_path  = new List<Track>();
+            foreach(var item in path)
+            {
+                _path.Add(item.Item1);
+            }*/
+        }
+        if (distance<0.1){
+            return;
+        }
+        if (TrackDirection){
+            int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
+            int pointsLeftInTrack = track.points.Length - indexTrack;
+            if (PointsToGo>=pointsLeftInTrack){
+                indexTrack=track.points.Length-1;
+                drive((PointsToGo-pointsLeftInTrack)/PointCreator.pointsPerUnit);
+            }else{
+                pointsLeftInTrack -= PointsToGo;
+                indexTrack = track.points.Length -pointsLeftInTrack;
+            }
+        }else{
+            int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
+            int pointsLeftInTrack = track.points.Length - indexTrack;
+            if (PointsToGo>=pointsLeftInTrack){
+                indexTrack=0;
+                drive((PointsToGo+pointsLeftInTrack-track.points.Length)/PointCreator.pointsPerUnit);
+            }else{
+                pointsLeftInTrack -= PointsToGo;
+                indexTrack = pointsLeftInTrack;
+            }
+        }   
     }
 
     bool findPath(){
@@ -81,6 +150,7 @@ public class Train : WorldObject
         HashSet<(Track,bool)> addToCalc = new HashSet<(Track,bool)>();
         addToCalc.Add((this.track,this.TrackDirection));
         while (addToCalc.Count!=0)
+
         {
             (Track,bool) current = (null,true); //= null true so the compiler shuts up
             (Vector2,Vector2) locationToCheck = (Vector2.zero,Vector2.zero);
@@ -129,15 +199,77 @@ public class Train : WorldObject
             return false;
         }
         //setup done
+    
+        //dijkstra declaration
+        Dictionary<(Vector2,Vector2),float> weights = new Dictionary<(Vector2,Vector2),float>();
+        Dictionary<(Vector2,Vector2),List<(Track,bool)>> course = new Dictionary<(Vector2,Vector2),List<(Track,bool)>>();
+        //dijkstra init
+        foreach ((Vector2,Vector2) item in toCalc)
+        {
+            weights.Add(item,float.PositiveInfinity);
+            course.Add(item,new List<(Track,bool)>());
+        }
+        if(TrackDirection){
+            weights[(track.lastPoint,track.lastTangent)] = 0;
+        }else{
+            weights[(track.firstPoint,-track.firstTangent)] = 0;
+        }
+
+        //dijkstra iteration
+        while(true){
+            //Debug.Log("iter");
+            float min = Mathf.Infinity;
+            foreach (var item in toCalc)    
+            {
+                min = Mathf.Min(weights[item],min);
+            }
+            (Vector2,Vector2) lowest = (Vector2.zero,Vector2.zero);
+            foreach (var item in weights)    
+            {
+                if(item.Value == min){
+                    lowest = item.Key;
+                    break;
+                }
+            }
+            List<(Track,bool)> lowestCourse= course[lowest];
 
 
+            if (lowest.Item1 == destination.location && (lowest.Item2 == destination.direction||lowest.Item2 == -destination.direction)){
+                //Debug.Log("!!!");
+                //Debug.Log(min);
+                //Debug.Log(lowestCourse.Count);
+                foreach (var item in lowestCourse)
+                {
+                    //Debug.Log(item.Item1.name);
+                    //Debug.Log(item.Item2);
+                }
+                path = lowestCourse;
+                return true;
+            }
 
+            foreach (var track in worldData.tracks)
+            {
+                if(track.firstPoint == lowest.Item1 && track.firstTangent == lowest.Item2){
+                    float weight = weights[(track.lastPoint,track.lastTangent)];
+                    if (weight>min+track.Lenght){
+                        weights[(track.lastPoint,track.lastTangent)] = min+track.Lenght;
+                        List<(Track,bool)> newCourse= new List<(Track, bool)>(course[lowest]);
+                        newCourse.Add((track,true));
+                        course[(track.lastPoint,track.lastTangent)]=newCourse;
+                    }
+                }
+                if(track.lastPoint == lowest.Item1 && track.lastTangent == -lowest.Item2){
+                    float weight = weights[(track.firstPoint,-track.firstTangent)];
+                    if (weight>min+track.Lenght){
+                        weights[(track.firstPoint,-track.firstTangent)] = min+track.Lenght;
+                        List<(Track,bool)> newCourse= new List<(Track, bool)>(course[lowest]);
+                        newCourse.Add((track,false));
+                        course[(track.firstPoint,-track.firstTangent)]=newCourse;
+                    }
+                }
 
-
-
-
-
-        return true;
-        
+            }
+            toCalc.Remove(lowest);
+        }
     }
 }
