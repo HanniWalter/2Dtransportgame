@@ -14,7 +14,7 @@ public class Stop : WorldObject
         }
     }
     
-    public Vector2 direction;
+    public float direction;
     public Track[] a;
 
 
@@ -56,9 +56,9 @@ public class Stop : WorldObject
     {
         
         if (this.GetTracks()[0].firstPoint == location){
-            direction = this.GetTracks()[0].firstTangent;
+            direction = this.GetTracks()[0].firstAngle;
         }else{
-            direction = this.GetTracks()[0].lastTangent;
+            direction = this.GetTracks()[0].lastAngle;
         }
         transform.localScale*=4;
         draw();

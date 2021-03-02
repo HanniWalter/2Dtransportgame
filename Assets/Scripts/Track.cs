@@ -23,10 +23,8 @@ public class Track : WorldObject
     }
 
     private static int _num = 0;
-    private List<Track> TracksConnectedStart;
-    private List<Track> TracksConnectedEnd;
     [SerializeField] public Vector2[] points;
-    [SerializeField] public Vector2[] tangents;
+    [SerializeField] public float[] angles;
 
     public Vector2 firstPoint{
         get
@@ -40,16 +38,16 @@ public class Track : WorldObject
             return points[points.Length-1];
         }
     }
-    public Vector2 firstTangent{
+    public float firstAngle{
         get
         {
-            return tangents[0];
+            return angles[0];
         }
     }
-    public Vector2 lastTangent{
+    public float lastAngle{
         get
         {
-            return tangents[points.Length-1];
+            return angles[points.Length-1];
         }
     }
 
@@ -61,12 +59,12 @@ public class Track : WorldObject
             var ret = new List<Track>();
             foreach(Track track in worldData.tracks){
                 if (track.firstPoint == this.firstPoint){
-                    if (Util.sameDirection(track.firstTangent,-this.firstTangent,5)){
+                    if (Util.sameDirection(track.firstAngle,Util.oppositeAngle(this.firstAngle),5)){
                         ret.Add(track);
                     }
                 }
                 if (track.lastPoint == this.firstPoint){
-                    if (Util.sameDirection(track.lastTangent,this.firstTangent,5)){
+                    if (Util.sameDirection(track.lastAngle,this.firstAngle,5)){
                         ret.Add(track);
                     }
                 }
@@ -81,12 +79,12 @@ public class Track : WorldObject
             var ret = new List<Track>();
             foreach(Track track in worldData.tracks){
                 if (track.firstPoint == this.lastPoint){
-                    if (Util.sameDirection(track.firstTangent,this.lastTangent,5)){
+                    if (Util.sameDirection(track.firstAngle,this.lastAngle,5)){
                         ret.Add(track);
                     }
                 }
                 if (track.lastPoint == this.lastPoint){
-                    if (Util.sameDirection(track.lastTangent,-this.lastTangent,5)){
+                    if (Util.sameDirection(track.lastAngle,Util.oppositeAngle(this.lastAngle),5)){
                         ret.Add(track);
                     }
                 }
@@ -98,13 +96,13 @@ public class Track : WorldObject
 
     public static Track newTrack (PointCreator pointCreator){
 
-		return newTrack (pointCreator.points, pointCreator.tangents);
+		return newTrack (pointCreator.points, pointCreator.angels);
     }
-    public static Track newTrack (Vector2[] points, Vector2[] tangents){
+    public static Track newTrack (Vector2[] points, float[] angles){
         GameObject newGameObject = new GameObject();
 		Track ret = newGameObject.AddComponent<Track>(); 
         ret.points = points;
-        ret.tangents = tangents;
+        ret.angles = angles;
         
 
 		return ret;

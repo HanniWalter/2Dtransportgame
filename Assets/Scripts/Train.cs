@@ -30,21 +30,12 @@ public class Train : WorldObject
         }
     }
     
-    public float directionAngle{
+    public float direction{
         get{
             return transform.eulerAngles.z;
         }
         set{
             transform.eulerAngles = new Vector3(0,0,value);
-        }
-    }
-
-    public Vector2 direction{
-        get{
-            return new Vector2(Mathf.Cos(transform.eulerAngles.z*Mathf.Deg2Rad),Mathf.Sin(transform.eulerAngles.z*Mathf.Deg2Rad)).normalized;
-        }
-        set{
-            transform.eulerAngles = new Vector3(0,0,Mathf.Atan2(value.y,value.x)*Mathf.Rad2Deg);
         }
     }
     public List<Stop> stops = new List<Stop>();
@@ -76,19 +67,14 @@ public class Train : WorldObject
     void Update()
     {
         location = track.points[indexTrack];
-        direction = track.tangents[indexTrack];
-
-        if (location == stops[indexStops].location && direction == stops[indexStops].direction ||location == stops[indexStops].location && direction == -stops[indexStops].direction){
+        direction = track.angles[indexTrack];
+        //Debug.Log(path.Count);
+        if (location == stops[indexStops].location && Util.sameDirection(direction , stops[indexStops].direction ,5)||location == stops[indexStops].location && Util.sameDirection(direction,Util.oppositeAngle(stops[indexStops].direction),5)){
             Debug.Log("arrived at: "+stops[indexStops].name);
+
             indexStops = indexStops +1;
         }
         drive(Time.deltaTime* 40);
-       
-        /*_path  = new List<Track>();
-        foreach(var item in path)
-        {
-            _path.Add(item.Item1);
-        }*/
     }
 
     void draw(){
@@ -102,7 +88,7 @@ public class Train : WorldObject
     void drive(float distance){
         if (indexTrack==track.points.Length-1 && TrackDirection || indexTrack==0 && !TrackDirection){
             if(path.Count == 0){
-                findPath();
+                bool a= findPath();
             }
             if (path.Count==0){
                 return;
@@ -144,14 +130,14 @@ public class Train : WorldObject
     }
 
     bool findPath(){
-        HashSet<(Vector2,Vector2)> toCalc = new HashSet<(Vector2,Vector2)>();
+        HashSet<(Vector2,float)> toCalc = new HashSet<(Vector2,float)>();
         HashSet<(Track,bool)> addToCalc = new HashSet<(Track,bool)>();
         addToCalc.Add((this.track,this.TrackDirection));
         while (addToCalc.Count!=0)
 
         {
-            (Track,bool) current = (null,true); //= null true so the compiler shuts up
-            (Vector2,Vector2) locationToCheck = (Vector2.zero,Vector2.zero);
+            (Track,bool) current = (null,true); //= 0 true so the compiler shuts up
+            (Vector2,float) locationToCheck = (Vector2.zero,0);
             foreach ((Track,bool) item in addToCalc)
             {
                 current = item;
@@ -160,9 +146,9 @@ public class Train : WorldObject
             addToCalc.Remove(current);
 
             if (current.Item2){
-                locationToCheck = (current.Item1.lastPoint,current.Item1.lastTangent);
+                locationToCheck = (current.Item1.lastPoint,current.Item1.lastAngle);
             }else{
-                locationToCheck = (current.Item1.firstPoint,-current.Item1.firstTangent);
+                locationToCheck = (current.Item1.firstPoint,Util.oppositeAngle(current.Item1.firstAngle));
             }
 
             if (!toCalc.Add(locationToCheck)){
@@ -172,56 +158,62 @@ public class Train : WorldObject
             if (current.Item2){
                 foreach (Track nextTrack in current.Item1.ConnectionsEnd)
                 {
-                    if(nextTrack.firstPoint == current.Item1.lastPoint && nextTrack.firstTangent == current.Item1.lastTangent){
+                    if(nextTrack.firstPoint == current.Item1.lastPoint && Util.sameDirection( nextTrack.firstAngle , current.Item1.lastAngle,5)){
                         addToCalc.Add((nextTrack,true));
                     }
-                    if(nextTrack.lastPoint == current.Item1.lastPoint && nextTrack.lastTangent == -current.Item1.lastTangent){
+                    if(nextTrack.lastPoint == current.Item1.lastPoint &&Util.sameDirection(nextTrack.lastAngle,Util.oppositeAngle(current.Item1.lastAngle),5)){
                         addToCalc.Add((nextTrack,false));
                     }
                 }
             }else{
                 foreach (Track nextTrack in current.Item1.ConnectionsBegin)
                 {
-                    if(nextTrack.firstPoint == current.Item1.firstPoint && nextTrack.firstTangent == -current.Item1.firstTangent){
+                    if(nextTrack.firstPoint == current.Item1.firstPoint && Util.sameDirection(nextTrack.firstAngle ,Util.oppositeAngle(current.Item1.firstAngle),5)){
                         addToCalc.Add((nextTrack,true));
                     }
-                    if(nextTrack.lastPoint == current.Item1.firstPoint && nextTrack.lastTangent == current.Item1.firstTangent){
+                    if(nextTrack.lastPoint == current.Item1.firstPoint && Util.sameDirection(nextTrack.lastAngle, current.Item1.firstAngle,5)){
                         addToCalc.Add((nextTrack,false));
                     }
                 }
             }
             
         }
-        Stop destination = stops[indexStops]; 
-        if (!(toCalc.Contains((destination.location,destination.direction))||toCalc.Contains((destination.location,-destination.direction)))){
+        Stop destination = stops[indexStops];
+        //Debug.Log(toCalc.Count);
+        foreach (var item in toCalc)
+        {
+            //Debug.Log(item.Item1);
+            //Debug.Log(item.Item2);
+        }
+
+        if (!(toCalc.Contains((destination.location,destination.direction))||toCalc.Contains((destination.location,Util.oppositeAngle(destination.direction))))){
             return false;
         }
         //setup done
     
         //dijkstra declaration
-        Dictionary<(Vector2,Vector2),float> weights = new Dictionary<(Vector2,Vector2),float>();
-        Dictionary<(Vector2,Vector2),List<(Track,bool)>> course = new Dictionary<(Vector2,Vector2),List<(Track,bool)>>();
+        Dictionary<(Vector2,float),float> weights = new Dictionary<(Vector2,float),float>();
+        Dictionary<(Vector2,float),List<(Track,bool)>> course = new Dictionary<(Vector2,float),List<(Track,bool)>>();
         //dijkstra init
-        foreach ((Vector2,Vector2) item in toCalc)
+        foreach ((Vector2,float) item in toCalc)
         {
             weights.Add(item,float.PositiveInfinity);
             course.Add(item,new List<(Track,bool)>());
         }
         if(TrackDirection){
-            weights[(track.lastPoint,track.lastTangent)] = 0;
+            weights[(track.lastPoint,track.lastAngle)] = 0;
         }else{
-            weights[(track.firstPoint,-track.firstTangent)] = 0;
+            weights[(track.firstPoint,Util.oppositeAngle(track.firstAngle))] = 0;
         }
 
         //dijkstra iteration
         while(true){
-            //Debug.Log("iter");
             float min = Mathf.Infinity;
             foreach (var item in toCalc)    
             {
                 min = Mathf.Min(weights[item],min);
             }
-            (Vector2,Vector2) lowest = (Vector2.zero,Vector2.zero);
+            (Vector2,float) lowest = (Vector2.zero,0);
             foreach (var item in weights)    
             {
                 if(item.Value == min){
@@ -229,17 +221,11 @@ public class Train : WorldObject
                     break;
                 }
             }
-            List<(Track,bool)> lowestCourse= course[lowest];
-
-
-            if (lowest.Item1 == destination.location && (lowest.Item2 == destination.direction||lowest.Item2 == -destination.direction)){
-                //Debug.Log("!!!");
-                //Debug.Log(min);
-                //Debug.Log(lowestCourse.Count);
+            List<(Track,bool)> lowestCourse= course[lowest];            
+            if (lowest.Item1 == destination.location && Util.sameDirection(lowest.Item2, destination.direction,5)||lowest.Item1 == destination.location && Util.sameDirection(lowest.Item2, Util.oppositeAngle(destination.direction),5)){
                 foreach (var item in lowestCourse)
                 {
-                    //Debug.Log(item.Item1.name);
-                    //Debug.Log(item.Item2);
+
                 }
                 path = lowestCourse;
                 return true;
@@ -247,27 +233,28 @@ public class Train : WorldObject
 
             foreach (var track in worldData.tracks)
             {
-                if(track.firstPoint == lowest.Item1 && track.firstTangent == lowest.Item2){
-                    float weight = weights[(track.lastPoint,track.lastTangent)];
+                if(track.firstPoint == lowest.Item1 && Util.sameDirection(track.firstAngle , lowest.Item2,5)){
+                    float weight = weights[(track.lastPoint,track.lastAngle)];
                     if (weight>min+track.Lenght){
-                        weights[(track.lastPoint,track.lastTangent)] = min+track.Lenght;
+                        weights[(track.lastPoint,track.lastAngle)] = min+track.Lenght;
                         List<(Track,bool)> newCourse= new List<(Track, bool)>(course[lowest]);
                         newCourse.Add((track,true));
-                        course[(track.lastPoint,track.lastTangent)]=newCourse;
+                        course[(track.lastPoint,track.lastAngle)]=newCourse;
                     }
                 }
-                if(track.lastPoint == lowest.Item1 && track.lastTangent == -lowest.Item2){
-                    float weight = weights[(track.firstPoint,-track.firstTangent)];
+                if(track.lastPoint == lowest.Item1 && Util.sameDirection(track.lastAngle, Util.oppositeAngle(lowest.Item2),5)){
+                    float weight = weights[(track.firstPoint,Util.oppositeAngle(track.firstAngle))];
                     if (weight>min+track.Lenght){
-                        weights[(track.firstPoint,-track.firstTangent)] = min+track.Lenght;
+                        weights[(track.firstPoint,Util.oppositeAngle(track.firstAngle))] = min+track.Lenght;
                         List<(Track,bool)> newCourse= new List<(Track, bool)>(course[lowest]);
                         newCourse.Add((track,false));
-                        course[(track.firstPoint,-track.firstTangent)]=newCourse;
+                        course[(track.firstPoint,Util.oppositeAngle(track.firstAngle))]=newCourse;
                     }
                 }
 
             }
             toCalc.Remove(lowest);
         }
+        
     }
 }

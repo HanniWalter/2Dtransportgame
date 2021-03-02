@@ -7,19 +7,46 @@ public class PointCreator
     //for returning
     public Vector2[] points;
     public Vector2[] tangents;
+    public float[] angels;
     public bool valid;
 
     public static float pointsPerUnit = 10f;
     public static float minLength = 2f;
     public static float maxLength = 10000f;
 
-    public static PointCreator create(Vector2 begin,Vector2 end,Vector2? beginTangent = null,Vector2? endTangent = null){
+    public static PointCreator create(Vector2 begin,Vector2 end,float? beginAngle = null,float? endAngle = null){
+        Vector2? endTangent = null;
+        Vector2? beginTangent = null;
+        if (beginAngle.HasValue){
+            beginTangent=Util.angleToV2(beginAngle.Value);
+        }
+        if (endAngle.HasValue){
+            endTangent=Util.angleToV2(endAngle.Value);
+        }
         if (beginTangent.HasValue && endTangent.HasValue){
-            return bezierCurvePC(begin,end,beginTangent.Value,endTangent.Value);
+            var ret = bezierCurvePC(begin,end,beginTangent.Value,endTangent.Value);
+            ret.angels = new float[ret.tangents.Length];
+            for (int i = 0; i < ret.tangents.Length; i++)
+            {
+                ret.angels[i] = Mathf.Atan2(ret.tangents[i].y, ret.tangents[i].x)*Mathf.Rad2Deg;
+                if (ret.angels[i]<0){
+                    ret.angels[i]+=360;
+                }
+            }
+            return ret;
         }
         if (endTangent.HasValue){
             if (Util.sameDirection((end-begin),-endTangent.Value,5)){
-                return StraightTwoPoints(begin ,end);
+                var ret = StraightTwoPoints(begin ,end);
+                ret.angels = new float[ret.tangents.Length];
+            for (int i = 0; i < ret.tangents.Length; i++)
+            {
+                ret.angels[i] = Mathf.Atan2(ret.tangents[i].y, ret.tangents[i].x)*Mathf.Rad2Deg;
+                if (ret.angels[i]<0){
+                    ret.angels[i]+=360;
+                }
+            }
+            return ret;
             }
 
             PointCreator pc = CircleTwoPointsBeginTangent(end,begin, endTangent.Value);
@@ -29,18 +56,54 @@ public class PointCreator
             {
                 pc.tangents[i] = - pc.tangents[i];
             }
+            pc.angels = new float[pc.tangents.Length];
+            for (int i = 0; i < pc.tangents.Length; i++)
+            {
+                pc.angels[i] = Mathf.Atan2(pc.tangents[i].y, pc.tangents[i].x)*Mathf.Rad2Deg;
+                if (pc.angels[i]<0){
+                    pc.angels[i]+=360;
+                }
+            }
             return pc;
         }
 
         if (beginTangent.HasValue){
             //too straight for curve
             if (Util.sameDirection((end-begin),beginTangent.Value,5)){
-                return StraightTwoPoints(begin ,end);
+                var retu= StraightTwoPoints(begin ,end);
+                retu.angels = new float[retu.tangents.Length];
+
+                for (int i = 0; i < retu.tangents.Length; i++)
+                {
+                    retu.angels[i] = Mathf.Atan2(retu.tangents[i].y, retu.tangents[i].x)*Mathf.Rad2Deg;
+                    if (retu.angels[i]<0){
+                    retu.angels[i]+=360;
+                }
+                }
+                return retu;
             }
-            return CircleTwoPointsBeginTangent(begin, end, beginTangent.Value);
+            var ret= CircleTwoPointsBeginTangent(begin, end, beginTangent.Value);
+            ret.angels = new float[ret.tangents.Length];
+            for (int i = 0; i < ret.tangents.Length; i++)
+            {
+                ret.angels[i] = Mathf.Atan2(ret.tangents[i].y, ret.tangents[i].x)*Mathf.Rad2Deg;
+                if (ret.angels[i]<0){
+                    ret.angels[i]+=360;
+                }
+            }
+            return ret;
 
         }else{
-            return StraightTwoPoints(begin ,end);
+            var ret = StraightTwoPoints(begin ,end);
+            ret.angels = new float[ret.tangents.Length];
+            for (int i = 0; i < ret.tangents.Length; i++)
+            {
+                ret.angels[i] = Mathf.Atan2(ret.tangents[i].y, ret.tangents[i].x)*Mathf.Rad2Deg;
+                if (ret.angels[i]<0){
+                    ret.angels[i]+=360;
+                }
+            }
+            return ret;
         }
     }
 

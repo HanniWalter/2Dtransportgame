@@ -33,4 +33,19 @@ public class Util{
     {
         return Mathf.Abs( Vector2.SignedAngle(v1,v2))<degree;
     }  
+
+    static public bool sameDirection(float a1,float a2, float degree)
+    {
+        //Debug.Log(Mathf.Abs(Mathf.DeltaAngle(a1,a2)));
+
+        return Mathf.Abs(Mathf.DeltaAngle(a1,a2))<degree;
+    }  
+
+    static public Vector2 angleToV2(float angle){
+        return new Vector2(Mathf.Cos(angle*Mathf.Deg2Rad),Mathf.Sin(angle*Mathf.Deg2Rad)).normalized;
+    }
+
+    static public float oppositeAngle(float angle){
+        return (angle+180)%360;
+    }
 }
