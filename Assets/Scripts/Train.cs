@@ -60,7 +60,7 @@ public class Train : WorldObject
     // Start is called before the first frame update
     void Start()
     {
-        draw();
+        setUpDraw();
     }
 
     // Update is called once per frame
@@ -77,7 +77,7 @@ public class Train : WorldObject
         drive(Time.deltaTime* 40);
     }
 
-    void draw(){
+    void setUpDraw(){
         gameObject.AddComponent<SpriteRenderer>();
         gameObject.transform.localScale *= 3; 
         SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
