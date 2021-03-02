@@ -11,6 +11,21 @@ public class Train : WorldObject
     [SerializeField] bool TrackDirection;
 
     List<(Track,bool)> path = new List<(Track, bool)>();
+
+    public List<Vehicle> vehicles = new List<Vehicle>();
+
+
+    public float Lenght 
+    {
+        get{
+            var ret = 0f;
+            foreach (var item in vehicles)
+            {
+                ret += item.Lenght;
+            }
+            return ret;
+        }
+    }
     //[SerializeField] List<Track> _path = new List<Track>();
     int indexStops{
         get{
@@ -68,13 +83,12 @@ public class Train : WorldObject
     {
         location = track.points[indexTrack];
         direction = track.angles[indexTrack];
-        //Debug.Log(path.Count);
         if (location == stops[indexStops].location && Util.sameDirection(direction , stops[indexStops].direction ,5)||location == stops[indexStops].location && Util.sameDirection(direction,Util.oppositeAngle(stops[indexStops].direction),5)){
             Debug.Log("arrived at: "+stops[indexStops].name);
 
             indexStops = indexStops +1;
         }
-        drive(Time.deltaTime* 40);
+        drive(Time.deltaTime* 40);S
     }
 
     void setUpDraw(){
@@ -95,7 +109,14 @@ public class Train : WorldObject
             }
             track = path[0].Item1;
             TrackDirection = path[0].Item2;
-            indexTrack=0;
+            if (TrackDirection)
+            {
+                indexTrack =0;
+            }
+            else
+            {
+                indexTrack=track.points.Length-1;
+            }
             path.RemoveAt(0);
             /*_path  = new List<Track>();
             foreach(var item in path)
@@ -118,7 +139,7 @@ public class Train : WorldObject
             }
         }else{
             int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
-            int pointsLeftInTrack = track.points.Length - indexTrack;
+            int pointsLeftInTrack = indexTrack;
             if (PointsToGo>=pointsLeftInTrack){
                 indexTrack=0;
                 drive((PointsToGo+pointsLeftInTrack-track.points.Length)/PointCreator.pointsPerUnit);
