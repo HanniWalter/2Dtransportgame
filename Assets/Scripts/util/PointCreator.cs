@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +9,6 @@ public class PointCreator
     public Vector2[] tangents;
     public float[] angels;
     public bool valid;
-
     public static float pointsPerUnit = 10f;
     public static float minLength = 2f;
     public static float maxLength = 10000f;
@@ -109,22 +108,49 @@ public class PointCreator
 
     private static PointCreator bezierCurvePC(Vector2 begin,Vector2 end,Vector2 beginTangent,Vector2 endTangent){
         PointCreator pointCreator = new PointCreator();
-        int numberOfPoints = (int)Mathf.Ceil((begin - end).magnitude * 10);
-        pointCreator.points = new Vector2[numberOfPoints+1];
-        pointCreator.tangents = new Vector2[numberOfPoints+1];
-        for (int i = 0; i <= numberOfPoints; i++)
+        int numberOfPrePoints = (int)Mathf.Floor((begin - end).magnitude * 1000);
+        var prePoints = new Vector2[numberOfPrePoints+1];        
+        var lenght = 0f;
+        prePoints[0]=BezierCurve(begin,end,beginTangent,endTangent,0);
+
+        for (int i = 1; i <= numberOfPrePoints; i++)
         {
-            float t =(float)i/(float)numberOfPoints;
-            pointCreator.points[i]=BezierCurve(begin,end,beginTangent,endTangent,t);
+            float t =(float)i/(float)numberOfPrePoints;
+            prePoints[i]=BezierCurve(begin,end,beginTangent,endTangent,t);
+            lenght+=(prePoints[i-1]-prePoints[i]).magnitude;
         }
+        int numberOfPoints = (int)(lenght*pointsPerUnit);
+
+        pointCreator.points = new Vector2[numberOfPoints+1];
+        var distanceProcest = 0f;
+        int j =1;
+        pointCreator.points[0]=begin;
+        for (int i = 0; i < numberOfPoints; i++)
+        {
+
+            pointCreator.points[i]=prePoints[j];
+            while(distanceProcest*pointsPerUnit<=i+1){
+                distanceProcest+=(prePoints[j-1]-prePoints[j]).magnitude;
+                j++;
+            }
+        }
+        pointCreator.points[0]=begin;
+        pointCreator.points[pointCreator.points.Length-1]=end;
+
+        pointCreator.tangents = new Vector2[numberOfPoints+1];
         for (int i = 1; i < numberOfPoints; i++)
         {
             pointCreator.tangents[i]=(pointCreator.points[i+1]-pointCreator.points[i-1]).normalized;
         }
+        /*for (int i = numberOfPoints-1; i <= numberOfPoints; i++)
+        {
+            Debug.Log((pointCreator.points[i-1]-pointCreator.points[i]).magnitude);
+        }*/
         pointCreator.tangents[0] = beginTangent.normalized;
         pointCreator.tangents[numberOfPoints] = endTangent.normalized;
         return pointCreator;
     }
+    
     private static PointCreator StraightTwoPoints(Vector2 begin, Vector2 end)
     {
         PointCreator pointCreator = new PointCreator();
