@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Stop : WorldObject
+public class WayPoint : WorldObject
 {
+    public Signal signalA;
+    public Signal signalB;
+
     private static int _num = 0;
     public Vector2 location{
         get{
@@ -18,10 +21,10 @@ public class Stop : WorldObject
     public Track[] a;
 
 
-    public static Stop newStop(Vector2 location){
+    public static WayPoint newStop(Vector2 location){
         WorldData worldData = FindObjectOfType<WorldData>();
         GameObject newGameObject = new GameObject();
-		Stop ret = newGameObject.AddComponent<Stop>(); 
+		WayPoint ret = newGameObject.AddComponent<WayPoint>(); 
         ret.location = location;
         
 		return ret;

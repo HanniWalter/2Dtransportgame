@@ -14,7 +14,6 @@ public class Train : WorldObject
 
     public List<Vehicle> vehicles = new List<Vehicle>();
 
-
     public float Lenght 
     {
         get{
@@ -36,31 +35,33 @@ public class Train : WorldObject
         }
     }  
     
-    public Vector2 location{
-        get{
-            return Util.toV2(transform.position);
-        }
+    public Queue<Vector2> _locationPoints;
+    public Queue<Vector2> locationPoints{
         set{
-            transform.position = Util.toV3(value);
+            _locationPoints = value;
+            debug_locationPoints = value.ToArray();
+        }
+        get{
+            return _locationPoints;
         }
     }
+    public Vector2[] debug_locationPoints;
+    public Vector2 location;    
+    public float direction;
+    public List<Signal> stops = new List<Signal>();
     
-    public float direction{
-        get{
-            return transform.eulerAngles.z;
-        }
-        set{
-            transform.eulerAngles = new Vector3(0,0,value);
-        }
-    }
-    public List<Stop> stops = new List<Stop>();
-    
-    public static Train newTrain(Track track,int pointnum,bool TrackDirection){
+    public static Train newTrain(Track track, bool TrackDirection){
         GameObject newGameObject = new GameObject();
 		Train ret = newGameObject.AddComponent<Train>(); 
-        ret.indexTrack = pointnum;
+        if (!TrackDirection){
+            ret.indexTrack = 1;
+        }else{
+            ret.indexTrack = track.points.Length-2;
+        }
         ret.track = track;
         ret.TrackDirection = TrackDirection;
+        
+        
         
 		return ret;
     }
@@ -75,7 +76,26 @@ public class Train : WorldObject
     // Start is called before the first frame update
     void Start()
     {
-        setUpDraw();
+
+        int index1 = indexTrack;
+        bool direction1 = TrackDirection;
+        Track track1 = track;
+        Debug.Log((int) (Lenght*PointCreator.pointsPerUnit));
+        locationPoints = new Queue<Vector2>((int) (Lenght*PointCreator.pointsPerUnit));
+        for (int i = 0; i < (int) (1.1 *Lenght*PointCreator.pointsPerUnit); i++)
+        {
+            locationPoints.Enqueue((track1.points[index1]));
+            if(!TrackDirection){
+                index1++;
+            }else{
+                index1--;
+            }
+        }
+        var list = new List<Vector2>( locationPoints.ToArray());
+        list.Reverse();
+        locationPoints = new Queue<Vector2>(list);
+        locationPoints = locationPoints;
+
     }
 
     // Update is called once per frame
@@ -83,22 +103,40 @@ public class Train : WorldObject
     {
         location = track.points[indexTrack];
         direction = track.angles[indexTrack];
-        if (location == stops[indexStops].location && Util.sameDirection(direction , stops[indexStops].direction ,5)||location == stops[indexStops].location && Util.sameDirection(direction,Util.oppositeAngle(stops[indexStops].direction),5)){
+        if (location == stops[indexStops].location && Util.sameDirection(direction , stops[indexStops].direction ,5)){
             Debug.Log("arrived at: "+stops[indexStops].name);
 
             indexStops = indexStops +1;
+        
         }
-        drive(Time.deltaTime* 40);S
+        int vehicleOffset = 0;
+        drive(Time.deltaTime* 40);
+        foreach (var item in vehicles)
+        {
+            item.draw(vehicleOffset);
+            vehicleOffset += (int)(item.Lenght * PointCreator.pointsPerUnit);
+        }
     }
 
-    void setUpDraw(){
-        gameObject.AddComponent<SpriteRenderer>();
-        gameObject.transform.localScale *= 3; 
-        SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Square");
+    void locationPointsUpdate(int start,int end){
+        if(end>start){
+            for (int i = start; i <= end; i++)
+            {
+                locationPoints.Enqueue(track.points[i]);
+            }
+        }else{
+            for (int i = start - 1; i >= end ; i--)
+            {
+                locationPoints.Enqueue(track.points[i]);
+            }      
+        }
+        debug_locationPoints =locationPoints.ToArray();
+        int maxlenght = (int)(1.1 * Lenght*PointCreator.pointsPerUnit); 
+        for (int i = maxlenght; i < locationPoints.Count; i++)
+        {
+            locationPoints.Dequeue();
+        }
     }
-
-
     void drive(float distance){
         if (indexTrack==track.points.Length-1 && TrackDirection || indexTrack==0 && !TrackDirection){
             if(path.Count == 0){
@@ -131,24 +169,31 @@ public class Train : WorldObject
             int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
             int pointsLeftInTrack = track.points.Length - indexTrack;
             if (PointsToGo>=pointsLeftInTrack){
+                locationPointsUpdate(indexTrack,track.points.Length-1);
                 indexTrack=track.points.Length-1;
                 drive((PointsToGo-pointsLeftInTrack)/PointCreator.pointsPerUnit);
             }else{
                 pointsLeftInTrack -= PointsToGo;
+                locationPointsUpdate(indexTrack, track.points.Length -pointsLeftInTrack);
                 indexTrack = track.points.Length -pointsLeftInTrack;
             }
         }else{
             int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
             int pointsLeftInTrack = indexTrack;
             if (PointsToGo>=pointsLeftInTrack){
+                locationPointsUpdate(indexTrack,0);
+
+
                 indexTrack=0;
                 drive((PointsToGo+pointsLeftInTrack-track.points.Length)/PointCreator.pointsPerUnit);
             }else{
                 pointsLeftInTrack -= PointsToGo;
+                locationPointsUpdate(indexTrack, pointsLeftInTrack);
                 indexTrack = pointsLeftInTrack;
             }
         }   
     }
+
 
     bool findPath(){
         HashSet<(Vector2,float)> toCalc = new HashSet<(Vector2,float)>();
@@ -199,7 +244,7 @@ public class Train : WorldObject
             }
             
         }
-        Stop destination = stops[indexStops];
+        Signal destination = stops[indexStops];
         //Debug.Log(toCalc.Count);
         foreach (var item in toCalc)
         {
@@ -207,7 +252,7 @@ public class Train : WorldObject
             //Debug.Log(item.Item2);
         }
 
-        if (!(toCalc.Contains((destination.location,destination.direction))||toCalc.Contains((destination.location,Util.oppositeAngle(destination.direction))))){
+        if (!(toCalc.Contains((destination.location,destination.direction)))){
             return false;
         }
         //setup done
@@ -243,11 +288,7 @@ public class Train : WorldObject
                 }
             }
             List<(Track,bool)> lowestCourse= course[lowest];            
-            if (lowest.Item1 == destination.location && Util.sameDirection(lowest.Item2, destination.direction,5)||lowest.Item1 == destination.location && Util.sameDirection(lowest.Item2, Util.oppositeAngle(destination.direction),5)){
-                foreach (var item in lowestCourse)
-                {
-
-                }
+            if (lowest.Item1 == destination.location && Util.sameDirection(lowest.Item2, destination.direction,5)){
                 path = lowestCourse;
                 return true;
             }

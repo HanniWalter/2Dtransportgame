@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -54,24 +54,38 @@ public class levelcreation : MonoBehaviour
         Track track25 = Track.newTrack(PointCreator.create(point24,point20,track24.lastAngle,track20.firstAngle));
         Track track26 = Track.newTrack(PointCreator.create(point22,point14,Util.oppositeAngle( track20.lastAngle),track13.lastAngle));
 
-        Stop stop1 = Stop.newStop(point12);
-        Stop stop2 = Stop.newStop(point23);
-        Stop stop3 = Stop.newStop(point1);
+        WayPoint stop1 = WayPoint.newStop(point12);
+        Signal signal1 = Signal.newSignal(stop1,true);
+        WayPoint stop2 = WayPoint.newStop(point23);
+        Signal signal2 = Signal.newSignal(stop2,true);
+        WayPoint stop3 = WayPoint.newStop(point1);
 
         foreach (var item in worlddata.tracks)
         {
             var a = item.ConnectionsBegin;
             var b = item.ConnectionsEnd;
+
+   /*   Debug.Log(item.name);
+            var min = Mathf.Infinity;
+            var max = 0f;
+
+          for (int i = 1; i < item.points.Length; i++)
+            {
+                var dist = (item.points[i-1]-item.points[i]).magnitude;
+                min = Mathf.Min(min,dist);
+                max = Mathf.Max(max,dist);
+            }
+            Debug.Log(max);
+            Debug.Log(min);*/
         }
         foreach (var item in worlddata.stops)
         {
             var a = item.GetTracks();
         }
 
-      
-        Train train1 = Train.newTrain(track12,50,false);
-        train1.stops.Add(stop1);
-        train1.stops.Add(stop2);
+        Train train1 = Train.newTrain(track12,true);
+        train1.stops.Add(signal1);
+        train1.stops.Add(signal2);
 
         Vehicle vehicle1 = Vehicle.newVehicle(8,train1);
         Vehicle vehicle2 = Vehicle.newVehicle(6,train1);
