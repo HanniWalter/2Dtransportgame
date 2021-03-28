@@ -80,7 +80,7 @@ public class Train : WorldObject
         int index1 = indexTrack;
         bool direction1 = TrackDirection;
         Track track1 = track;
-        Debug.Log((int) (Lenght*PointCreator.pointsPerUnit));
+        //Debug.Log((int) (Lenght*PointCreator.pointsPerUnit));
         locationPoints = new Queue<Vector2>((int) (Lenght*PointCreator.pointsPerUnit));
         for (int i = 0; i < (int) (1.1 *Lenght*PointCreator.pointsPerUnit); i++)
         {
@@ -103,8 +103,8 @@ public class Train : WorldObject
     {
         location = track.points[indexTrack];
         direction = track.angles[indexTrack];
-        if (location == stops[indexStops].location && Util.sameDirection(direction , stops[indexStops].direction ,5)){
-            Debug.Log("arrived at: "+stops[indexStops].name);
+        if (location == stops[indexStops].location && Util.sameDirection(direction, stops[indexStops].direction ,5)){
+            Debug.Log("arrived at: "+stops[indexStops].wayPoint.name);
 
             indexStops = indexStops +1;
         
@@ -224,10 +224,10 @@ public class Train : WorldObject
             if (current.Item2){
                 foreach (Track nextTrack in current.Item1.ConnectionsEnd)
                 {
-                    if(nextTrack.firstPoint == current.Item1.lastPoint && Util.sameDirection( nextTrack.firstAngle , current.Item1.lastAngle,5)){
+                    if(nextTrack.firstPoint == current.Item1.lastPoint && Util.sameDirection(nextTrack.firstAngle , current.Item1.lastAngle,5)){
                         addToCalc.Add((nextTrack,true));
                     }
-                    if(nextTrack.lastPoint == current.Item1.lastPoint &&Util.sameDirection(nextTrack.lastAngle,Util.oppositeAngle(current.Item1.lastAngle),5)){
+                    if(nextTrack.lastPoint == current.Item1.lastPoint && Util.sameDirection(nextTrack.lastAngle,Util.oppositeAngle(current.Item1.lastAngle),5)){
                         addToCalc.Add((nextTrack,false));
                     }
                 }

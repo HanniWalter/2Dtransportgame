@@ -7,7 +7,9 @@ public class WayPoint : WorldObject
     public Signal signalA;
     public Signal signalB;
 
+    //for nameing
     private static int _num = 0;
+
     public Vector2 location{
         get{
             return Util.toV2(transform.position);
@@ -18,10 +20,34 @@ public class WayPoint : WorldObject
     }
     
     public float direction;
-    public Track[] a;
 
+    public Dictionary<float,List<Track>> TracksDirection =new Dictionary<float, List<Track>>();
 
-    public static WayPoint newStop(Vector2 location){
+    public List<Track> DEB_Tracks = new List<Track>();
+    public List<float> DEB_Direction = new List<float>();
+
+    public void AddTrack(Track track){
+        if(track.firstPoint == location){
+            if (TracksDirection.ContainsKey(track.firstAngle)){
+            }else{
+                TracksDirection[track.firstAngle] = new List<Track>();
+            }
+            TracksDirection[track.firstAngle].Add(track);
+            DEB_Tracks.Add(track);
+            DEB_Direction.Add(track.firstAngle);
+        }
+        if(track.lastPoint == location){
+            if (TracksDirection.ContainsKey(Util.oppositeAngle(track.lastAngle))){
+            }else{
+                TracksDirection[Util.oppositeAngle(track.lastAngle)] = new List<Track>();
+            }
+            TracksDirection[Util.oppositeAngle(track.lastAngle)].Add(track);
+            DEB_Tracks.Add(track);
+            DEB_Direction.Add(Util.oppositeAngle(track.lastAngle));
+        }
+    }
+
+    public static WayPoint newWayPoint(Vector2 location){
         WorldData worldData = FindObjectOfType<WorldData>();
         GameObject newGameObject = new GameObject();
 		WayPoint ret = newGameObject.AddComponent<WayPoint>(); 
@@ -30,7 +56,7 @@ public class WayPoint : WorldObject
 		return ret;
     }
 
-    public Track[] GetTracks(){
+    /*public Track[] GetTracks(){
         List<Track> ret = new List<Track>();
         foreach(Track t in worldData.tracks){
             if(t.firstPoint == this.location){
@@ -41,28 +67,21 @@ public class WayPoint : WorldObject
                 ret.Add(t);
             }
         }
-        a = ret.ToArray();
         return ret.ToArray();
-    }
+    }*/
 
     new void Awake(){
         ((WorldObject) this).Awake();
-        gameObject.name = "Stop "+ _num.ToString();
+        gameObject.name = "WayPoint "+ _num.ToString();
         _num++;
         gameObject.AddComponent<SpriteRenderer>();
-        worldData.stops.Add(this);
+        worldData.wayPoints.Add(this);
 
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
-        if (this.GetTracks()[0].firstPoint == location){
-            direction = this.GetTracks()[0].firstAngle;
-        }else{
-            direction = this.GetTracks()[0].lastAngle;
-        }
         transform.localScale*=4;
         draw();
     }

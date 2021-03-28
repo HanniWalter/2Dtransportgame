@@ -5,7 +5,7 @@ using UnityEngine;
 public class WorldData : MonoBehaviour
 {
     public List<Track> tracks;
-    public List<WayPoint> stops;
+    public List<WayPoint> wayPoints;
     public List<Train> trains;
     
     // Start is called before the first frame update

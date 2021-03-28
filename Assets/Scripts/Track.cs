@@ -51,60 +51,55 @@ public class Track : WorldObject
         }
     }
 
+
+
     [SerializeField] private Track[] _ConnectionsBegin;
     [SerializeField] private Track[] _ConnectionsEnd;
 
-    public Track[] ConnectionsBegin{
+    public WayPoint WayPointBegin;
+    public WayPoint WayPointEnd;
+
+    public List<Track> ConnectionsBegin{
         get{
-            var ret = new List<Track>();
-            foreach(Track track in worldData.tracks){
-                if (track.firstPoint == this.firstPoint){
-                    if (Util.sameDirection(track.firstAngle,Util.oppositeAngle(this.firstAngle),5)){
-                        ret.Add(track);
-                    }
-                }
-                if (track.lastPoint == this.firstPoint){
-                    if (Util.sameDirection(track.lastAngle,this.firstAngle,5)){
-                        ret.Add(track);
-                    }
+            foreach (var item in WayPointBegin.TracksDirection.Keys)
+            {
+                if(Util.sameDirection(item,Util.oppositeAngle(firstAngle),5f)){
+                    var ret = WayPointBegin.TracksDirection[item];
+                    _ConnectionsBegin = ret.ToArray();
+                    return ret;
                 }
             }
-            _ConnectionsBegin = ret.ToArray();
-            return ret.ToArray();
+            Debug.Log(this);
+            return new List<Track>();
         }
     }
 
-    public Track[] ConnectionsEnd{
+    public List<Track> ConnectionsEnd{
         get{
-            var ret = new List<Track>();
-            foreach(Track track in worldData.tracks){
-                if (track.firstPoint == this.lastPoint){
-                    if (Util.sameDirection(track.firstAngle,this.lastAngle,5)){
-                        ret.Add(track);
-                    }
-                }
-                if (track.lastPoint == this.lastPoint){
-                    if (Util.sameDirection(track.lastAngle,Util.oppositeAngle(this.lastAngle),5)){
-                        ret.Add(track);
-                    }
+            foreach (var item in WayPointEnd.TracksDirection.Keys)
+            {
+                if(Util.sameDirection(item,lastAngle,5f)){
+                    var ret = WayPointEnd.TracksDirection[item];
+                    _ConnectionsEnd = ret.ToArray();
+                    return ret;
                 }
             }
-            _ConnectionsEnd = ret.ToArray();
-            return ret.ToArray();
+            Debug.Log(this);
+            return new List<Track>();
         }
     }
 
-    public static Track newTrack (PointCreator pointCreator){
+    public static Track newTrack (PointCreator pointCreator, WayPoint begin, WayPoint end){
 
-		return newTrack (pointCreator.points, pointCreator.angels);
+		return newTrack (pointCreator.points, pointCreator.angels,begin,end);
     }
-    public static Track newTrack (Vector2[] points, float[] angles){
+    public static Track newTrack (Vector2[] points, float[] angles, WayPoint begin, WayPoint end){
         GameObject newGameObject = new GameObject();
 		Track ret = newGameObject.AddComponent<Track>(); 
         ret.points = points;
         ret.angles = angles;
-        
-
+        ret.WayPointBegin = begin;
+        ret.WayPointEnd = end;
 		return ret;
     }
 
@@ -114,11 +109,17 @@ public class Track : WorldObject
         _num++;
         gameObject.AddComponent<LineRenderer>();
         worldData.tracks.Add(this);
+        
+        
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        foreach (WayPoint wp in worldData.wayPoints)
+        {
+            wp.AddTrack(this);
+        } 
         draw();
     }
 
