@@ -96,4 +96,30 @@ public class WayPoint : WorldObject
         SpriteRenderer spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Circle");
     }
+
+    public Type type{
+        get{
+            if(signalA != null || signalB != null){
+                return Type.Signal;
+            }
+            if(TracksDirection.Count==1){
+                return Type.DeadEnd;
+            }
+            foreach (var item in TracksDirection.Values)
+            {
+                if(item.Count==2){
+                    return Type.Switch;
+                }
+            }
+            return Type.Default;
+        }
+    }
+
+    public enum Type
+    {
+        Default,
+        DeadEnd,
+        Signal,
+        Switch
+    }
 }
