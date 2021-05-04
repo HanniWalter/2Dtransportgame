@@ -77,7 +77,7 @@ public class TrackBuilder : MonoBehaviour
         Vector2 endLocation;
         float? startangle = null;
         float? endangle = null;
-        Debug.Log("Test");
+        //Debug.Log("Test");
 
         if(mainInputController.objectundercourser != null)
         {
@@ -88,9 +88,9 @@ public class TrackBuilder : MonoBehaviour
             if(wayPoint == lastWayPoint){
                 return;
             }
-            Debug.Log(mainInputController.objectundercourser.GetType());
-            Debug.Log((new List<float>(wayPoint.TracksDirection.Keys)[0]));
-            Debug.Log("Test.5");
+            //Debug.Log(mainInputController.objectundercourser.GetType());
+            //Debug.Log((new List<float>(wayPoint.TracksDirection.Keys)[0]));
+            //Debug.Log("Test.5");
             if (wayPoint.type == WayPoint.Type.DeadEnd){
                 endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
             }
@@ -101,16 +101,16 @@ public class TrackBuilder : MonoBehaviour
             endLocation = wayPoint.location;
         }else
         {
-            Debug.Log("Test2");
+            //Debug.Log("Test2");
             endLocation = mainInputController.courserFixed;
-            Debug.Log("Test3");
+            //Debug.Log("Test3");
         }
-        Debug.Log("Test3.5");
+        //Debug.Log("Test3.5");
 
 
         if(lastWayPoint != null){ 
             //here lastangle
-            Debug.Log("Test4");
+            //Debug.Log("Test4");
 
             if (lastWayPoint.type == WayPoint.Type.DeadEnd){
                 startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
@@ -120,11 +120,11 @@ public class TrackBuilder : MonoBehaviour
                 startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
             }
 
-            Debug.Log("Test5");
+            //Debug.Log("Test5");
             var points = PointCreator.create(lastWayPoint.location,endLocation,startangle,endangle).points;
             previewTrack.positionCount = points.Length;
             previewTrack.SetPositions(Util.toV3A(points));
-            Debug.Log("Test6");
+            //Debug.Log("Test6");
 
         }else
         {
@@ -132,7 +132,7 @@ public class TrackBuilder : MonoBehaviour
             previewTrack.positionCount = points.Length;
             previewTrack.SetPositions(Util.toV3A(points));
         }
-            Debug.Log("Test7");
+            //Debug.Log("Test7");
     }
 
     private void TrackPlaceing(){
