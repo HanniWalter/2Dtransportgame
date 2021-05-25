@@ -6,18 +6,18 @@ public class Track : WorldObject
 {
 
 
-    [SerializeField] private float _lenght = 0;
-    public float Lenght{
+    [SerializeField] private float _length = 0;
+    public float Length{
         get{
-            if (_lenght != 0){
-                return _lenght;
+            if (_length != 0){
+                return _length;
             }else{
-                _lenght = 0;
+                _length = 0;
                 for (int i = 0; i < points.Length-1; i++)
                 {
-                    _lenght +=(points[i] -points[i+1]).magnitude;
+                    _length +=(points[i] -points[i+1]).magnitude;
                 }
-                return _lenght;
+                return _length;
             }
         }
     }
@@ -51,43 +51,11 @@ public class Track : WorldObject
         }
     }
 
-
-
-    [SerializeField] private Track[] _ConnectionsBegin;
-    [SerializeField] private Track[] _ConnectionsEnd;
-
     public WayPoint WayPointBegin;
     public WayPoint WayPointEnd;
 
-    public List<Track> ConnectionsBegin{
-        get{
-            foreach (var item in WayPointBegin.TracksDirection.Keys)
-            {
-                if(Util.sameDirection(item,Util.oppositeAngle(firstAngle),5f)){
-                    var ret = WayPointBegin.TracksDirection[item];
-                    _ConnectionsBegin = ret.ToArray();
-                    return ret;
-                }
-            }
-            Debug.Log(this);
-            return new List<Track>();
-        }
-    }
+    LineRenderer[] lineRenderer = {null,null,null};
 
-    public List<Track> ConnectionsEnd{
-        get{
-            foreach (var item in WayPointEnd.TracksDirection.Keys)
-            {
-                if(Util.sameDirection(item,lastAngle,5f)){
-                    var ret = WayPointEnd.TracksDirection[item];
-                    _ConnectionsEnd = ret.ToArray();
-                    return ret;
-                }
-            }
-            Debug.Log(this);
-            return new List<Track>();
-        }
-    }
 
     public static Track newTrack (PointCreator pointCreator, WayPoint begin, WayPoint end){
 
@@ -100,6 +68,7 @@ public class Track : WorldObject
         ret.angles = angles;
         ret.WayPointBegin = begin;
         ret.WayPointEnd = end;
+
 		return ret;
     }
 
@@ -107,7 +76,7 @@ public class Track : WorldObject
         ((WorldObject) this).Awake();
         gameObject.name = "Track "+ _num.ToString();
         _num++;
-        gameObject.AddComponent<LineRenderer>();
+
         worldData.tracks.Add(this);
         
         
@@ -116,22 +85,112 @@ public class Track : WorldObject
     // Start is called before the first frame update
     void Start()
     {
-        foreach (WayPoint wp in worldData.wayPoints)
-        {
-            wp.AddTrack(this);
-        } 
         draw();
+        WayPointBegin.AddTrack(this);
+        WayPointEnd.AddTrack(this);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    void OnDestroy(){
+        WayPointBegin.DeleteTrack(this);
+        WayPointEnd.DeleteTrack(this);
+    }
+
+    void Update(){
+        color();
     }
 
     void draw(){
-        LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
-        lineRenderer.positionCount = points.Length;
-        lineRenderer.SetPositions(Util.toV3A(points));
+        //LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
+        
+        int offset = 200; 
+        Vector2[] pointsA = new Vector2[offset+1];
+        Vector2[] pointsB = new Vector2[points.Length-2*offset+1];
+        Vector2[] pointsC = new Vector2[offset];
+        for (int i = 0; i < points.Length; i++)
+        {
+            if(i<=offset){
+                pointsA[i] = points[i];
+            }
+            if((i>=offset) && (i<=points.Length-offset)){
+                pointsB[i-offset] = points[i];
+            }
+            if(i>=points.Length-offset){
+                pointsC[i+offset-points.Length] = points[i];
+            }
+        }
+        var seg1 = new GameObject("Segment1");
+        var seg2 = new GameObject("Segment2");
+        var seg3 = new GameObject("Segment3");
+        seg1.transform.parent = transform;
+        seg2.transform.parent = transform;
+        seg3.transform.parent = transform;
+        lineRenderer[0] =seg1.AddComponent<LineRenderer>();
+        lineRenderer[1] =seg2.AddComponent<LineRenderer>();
+        lineRenderer[2] =seg3.AddComponent<LineRenderer>();
+        lineRenderer[0].positionCount = pointsA.Length;
+        lineRenderer[1].positionCount = pointsB.Length;
+        lineRenderer[2].positionCount = pointsC.Length;
+        lineRenderer[0].SetPositions(Util.toV3A(pointsA));
+        lineRenderer[1].SetPositions(Util.toV3A(pointsB));
+        lineRenderer[2].SetPositions(Util.toV3A(pointsC));
+
+        color();
+    }
+
+    public void color(){ 
+        colorFirst();
+        colorMiddle();
+        colorLast();        
+    }
+
+    private void colorFirst(){
+        var matlight = Resources.Load<Material>("Materials/TrackLight");
+        var matdark = Resources.Load<Material>("Materials/Track");
+        if(WayPointBegin.type == WayPointType.TrackSwitch){
+            if(WayPointBegin.branchoff){
+                if(WayPointBegin.tracks[1]==this){
+                    lineRenderer[0].material = matlight;
+                    lineRenderer[0].sortingOrder = -1;
+                    return;
+                }
+            }else{
+                if(WayPointBegin.tracks[2]==this){
+                    lineRenderer[0].material = matlight;
+                    lineRenderer[0].sortingOrder = -1;
+                    return;
+                }
+            }
+        }
+        lineRenderer[0].material = matdark;
+        lineRenderer[0].sortingOrder = 0;
+    }
+
+    private void colorMiddle(){
+        var matlight = Resources.Load<Material>("Materials/TrackLight");
+        var matdark = Resources.Load<Material>("Materials/Track");
+        lineRenderer[1].material = matdark;
+        
+    }
+
+    private void colorLast(){
+        var matlight = Resources.Load<Material>("Materials/TrackLight");
+        var matdark = Resources.Load<Material>("Materials/Track");
+        if(WayPointEnd.type == WayPointType.TrackSwitch){
+            if(WayPointEnd.branchoff){
+                if(WayPointEnd.tracks[1]==this){
+                    lineRenderer[2].material = matlight;
+                    lineRenderer[2].sortingOrder = -1;
+                    return;
+                }
+            }else{
+                if(WayPointEnd.tracks[2]==this){
+                    lineRenderer[2].material = matlight;
+                    lineRenderer[2].sortingOrder = -1;
+                    return;
+                }
+            }
+        }
+        lineRenderer[2].material = matdark;
+        lineRenderer[2].sortingOrder = 0;
     }
 }

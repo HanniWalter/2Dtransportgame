@@ -41,9 +41,9 @@ public class Signal : WorldObject
         gameObject.AddComponent<LineRenderer>();
         gameObject.transform.parent = wayPoint.transform;
         if(this.trackDirection){
-            this.wayPoint.signalA=this;
+            //this.wayPoint.signalA=this;
         }else{
-            this.wayPoint.signalB=this;
+            //this.wayPoint.signalB=this;
         }
     }
 

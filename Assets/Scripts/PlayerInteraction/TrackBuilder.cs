@@ -25,7 +25,7 @@ public class TrackBuilder : MonoBehaviour
         previewTrack = GetComponent<LineRenderer>();
         mainTabGroup = GetComponent<TabGroup>();
         
-        //mainInputController= GetComponent<MainInputController>();
+        mainInputController= FindObjectOfType<MainInputController>();
 		playerInputController = mainInputController.playerInputController;
         playerInputController.Mouse.RightButton.performed += ctx => RightMouseClick(ctx);
         playerInputController.Mouse.LeftButton.performed += _ => LeftMouseClick();
@@ -62,11 +62,11 @@ public class TrackBuilder : MonoBehaviour
 
     private void showPreviewTrack(){
         
-        if(mainInputController.objectundercourser != null){
+       /* if(mainInputController.objectundercourser != null){
             var wayPoint = (WayPoint) mainInputController.objectundercourser;
-            if(wayPoint.type == WayPoint.Type.Switch||wayPoint.type == WayPoint.Type.Signal){
-                return;
-            }
+            //if(wayPoint.type == WayPoint.Type.Switch||wayPoint.type == WayPoint.Type.Signal){
+            //    return;
+            //}
         }
         if (lastWayPoint == null && lastpoint == null)
         {
@@ -91,13 +91,13 @@ public class TrackBuilder : MonoBehaviour
             //Debug.Log(mainInputController.objectundercourser.GetType());
             //Debug.Log((new List<float>(wayPoint.TracksDirection.Keys)[0]));
             //Debug.Log("Test.5");
-            if (wayPoint.type == WayPoint.Type.DeadEnd){
-                endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
-            }
-            if (wayPoint.type == WayPoint.Type.Default){
+            //if (wayPoint.type == WayPoint.Type.DeadEnd){
+            //    endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
+            //}
+            //if (wayPoint.type == WayPoint.Type.Default){
                     //here better angle
                 endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
-            }
+            //}
             endLocation = wayPoint.location;
         }else
         {
@@ -112,13 +112,13 @@ public class TrackBuilder : MonoBehaviour
             //here lastangle
             //Debug.Log("Test4");
 
-            if (lastWayPoint.type == WayPoint.Type.DeadEnd){
+            //if (lastWayPoint.type == WayPoint.Type.DeadEnd){
                 startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
-            }
-            if (lastWayPoint.type == WayPoint.Type.Default){
+            //}
+            //if (lastWayPoint.type == WayPoint.Type.Default){
                 //here better angle
                 startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
-            }
+            //}
 
             //Debug.Log("Test5");
             var points = PointCreator.create(lastWayPoint.location,endLocation,startangle,endangle).points;
@@ -132,17 +132,17 @@ public class TrackBuilder : MonoBehaviour
             previewTrack.positionCount = points.Length;
             previewTrack.SetPositions(Util.toV3A(points));
         }
-            //Debug.Log("Test7");
+            //Debug.Log("Test7");*/
     }
 
-    private void TrackPlaceing(){
+    private void TrackPlaceing(){/*
         if(mainInputController.objectundercourser != null){
             var wayPoint = (WayPoint) mainInputController.objectundercourser;
-            if(wayPoint.type == WayPoint.Type.Switch||wayPoint.type == WayPoint.Type.Signal){
-                lastpoint = null;
-                lastWayPoint = null;
-                return;
-            }
+            //if(wayPoint.type == WayPoint.Type.Switch||wayPoint.type == WayPoint.Type.Signal){
+            //    lastpoint = null;
+            //    lastWayPoint = null;
+            //    return;
+            //}
         }
         if (lastWayPoint == null && lastpoint == null)
         {
@@ -164,13 +164,13 @@ public class TrackBuilder : MonoBehaviour
                 if(wayPoint == lastWayPoint){
                     return;
                 }
-                if (wayPoint.type == WayPoint.Type.DeadEnd){
-                    endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
-                }
-                if (wayPoint.type == WayPoint.Type.Default){
+                //if (wayPoint.type == WayPoint.Type.DeadEnd){
+                //    endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
+                //}
+                //if (wayPoint.type == WayPoint.Type.Default){
                     //here better angle
                     endangle = (new List<float>(wayPoint.TracksDirection.Keys))[0];
-                }
+                //}
 
             }else
             {
@@ -184,13 +184,13 @@ public class TrackBuilder : MonoBehaviour
             if(lastWayPoint != null){ 
                 //here lastangle
                 //Debug.Log("Test4");
-                if (lastWayPoint.type == WayPoint.Type.DeadEnd){
-                    startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
-                }
-                if (lastWayPoint.type == WayPoint.Type.Default){
+                //if (lastWayPoint.type == WayPoint.Type.DeadEnd){
+                //    startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
+                //}
+                //if (lastWayPoint.type == WayPoint.Type.Default){
                     //here better angle
                     startangle = Util.oppositeAngle((new List<float>(lastWayPoint.TracksDirection.Keys))[0]);
-                }
+                //}
 
                 //Debug.Log("Test5");
 
@@ -204,6 +204,6 @@ public class TrackBuilder : MonoBehaviour
             }
             lastpoint = wayPoint.location;
             lastWayPoint = wayPoint;
-        }
+        }*/
     }
 }

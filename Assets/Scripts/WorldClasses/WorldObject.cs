@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WorldObject : MonoBehaviour
+public abstract class WorldObject : MonoBehaviour
 {
     public WorldData worldData;
 
@@ -12,14 +12,17 @@ public class WorldObject : MonoBehaviour
         gameObject.transform.parent = worldData.gameObject.transform;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    public Vector2 location{
+        get{
+            return Util.toV2(transform.position);
+        }
+        set{
+            transform.position = Util.toV3(value);
+        }
     }
+    public float direction = 0f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public virtual string getInterface(){
+        return this.GetType().ToString();
     }
 }

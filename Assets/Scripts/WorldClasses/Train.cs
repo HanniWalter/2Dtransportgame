@@ -46,8 +46,8 @@ public class Train : WorldObject
         }
     }
     public Vector2[] debug_locationPoints;
-    public Vector2 location;    
-    public float direction;
+    public new Vector2 location;    
+    public new float direction;
     public List<Signal> stops = new List<Signal>();
     
     public static Train newTrain(Track track, bool TrackDirection){
@@ -140,7 +140,7 @@ public class Train : WorldObject
     void drive(float distance){
         if (indexTrack==track.points.Length-1 && TrackDirection || indexTrack==0 && !TrackDirection){
             if(path.Count == 0){
-                bool a= findPath();
+                //bool a= findPath();
             }
             if (path.Count==0){
                 return;
@@ -195,7 +195,7 @@ public class Train : WorldObject
     }
 
 
-    bool findPath(){
+    /*bool findPath(){
         HashSet<(Vector2,float)> toCalc = new HashSet<(Vector2,float)>();
         HashSet<(Track,bool)> addToCalc = new HashSet<(Track,bool)>();
         addToCalc.Add((this.track,this.TrackDirection));
@@ -318,5 +318,5 @@ public class Train : WorldObject
             toCalc.Remove(lowest);
         }
         
-    }
+    }*/
 }
