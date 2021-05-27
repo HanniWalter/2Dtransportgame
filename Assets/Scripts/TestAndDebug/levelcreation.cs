@@ -75,16 +75,16 @@ public class levelcreation : MonoBehaviour
             Debug.Log(max);
             Debug.Log(min);*/
         
-
-    /*   Train train1 = Train.newTrain(track12,true);
-        train1.stops.Add(signal1);
-        train1.stops.Add(signal2);
+    
+        Train train1 = Train.newTrain(track12,true);
+        //train1.stops.Add(signal1);
+        //train1.stops.Add(signal2);
 
        Vehicle vehicle1 = Vehicle.newVehicle(8,train1);
        Vehicle vehicle2 = Vehicle.newVehicle(6,train1);
        Vehicle vehicle3 = Vehicle.newVehicle(6,train1);
        Vehicle vehicle4 = Vehicle.newVehicle(6,train1);
-       Vehicle vehicle5 = Vehicle.newVehicle(6,train1);*/
+       Vehicle vehicle5 = Vehicle.newVehicle(6,train1);
     }
 
     void Update()

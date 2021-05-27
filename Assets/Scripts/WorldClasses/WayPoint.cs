@@ -186,7 +186,7 @@ public class WayPoint : WorldObject
         }
     }
 
-public void DeleteTrack(Track track){
+    public void DeleteTrack(Track track){
         if (track.firstPoint != location || track.lastPoint != location){
             throw new GameLogicException($"Track \"{this.name}\" does not touch the WayPoint \""+this.name+"\"."); 
         }

@@ -10,7 +10,7 @@ public class Train : WorldObject
     [SerializeField] int _indexStops = 0;
     [SerializeField] bool TrackDirection;
 
-    List<(Track,bool)> path = new List<(Track, bool)>();
+    //List<(Track,bool)> path = new List<(Track, bool)>();
 
     public List<Vehicle> vehicles = new List<Vehicle>();
 
@@ -26,17 +26,17 @@ public class Train : WorldObject
         }
     }
     //[SerializeField] List<Track> _path = new List<Track>();
-    int indexStops{
+    /*int indexStops{
         get{
             return _indexStops;
         }
         set{
             _indexStops = (value % stops.Count);
         }
-    }  
+    } */ 
     
-    public Queue<Vector2> _locationPoints;
-    public Queue<Vector2> locationPoints{
+    public Queue<Vector2> locationPoints;
+    /*public Queue<Vector2> locationPoints{
         set{
             _locationPoints = value;
             debug_locationPoints = value.ToArray();
@@ -44,11 +44,9 @@ public class Train : WorldObject
         get{
             return _locationPoints;
         }
-    }
-    public Vector2[] debug_locationPoints;
-    public new Vector2 location;    
-    public new float direction;
-    public List<Signal> stops = new List<Signal>();
+    }*/
+    //[SerializeField] Vector2[] debug_locationPoints;
+    //public List<WayPoint> stops = new List<WayPoint>();
     
     public static Train newTrain(Track track, bool TrackDirection){
         GameObject newGameObject = new GameObject();
@@ -60,8 +58,6 @@ public class Train : WorldObject
         }
         ret.track = track;
         ret.TrackDirection = TrackDirection;
-        
-        
         
 		return ret;
     }
@@ -76,7 +72,6 @@ public class Train : WorldObject
     // Start is called before the first frame update
     void Start()
     {
-
         int index1 = indexTrack;
         bool direction1 = TrackDirection;
         Track track1 = track;
@@ -94,7 +89,6 @@ public class Train : WorldObject
         var list = new List<Vector2>( locationPoints.ToArray());
         list.Reverse();
         locationPoints = new Queue<Vector2>(list);
-        locationPoints = locationPoints;
 
     }
 
@@ -103,12 +97,12 @@ public class Train : WorldObject
     {
         location = track.points[indexTrack];
         direction = track.angles[indexTrack];
-        if (location == stops[indexStops].location && Util.sameDirection(direction, stops[indexStops].direction ,5)){
+        /*if (location == stops[indexStops].location && Util.sameDirection(direction, stops[indexStops].direction ,5)){
             Debug.Log("arrived at: "+stops[indexStops].wayPoint.name);
 
             indexStops = indexStops +1;
         
-        }
+        }*/
         int vehicleOffset = 0;
         drive(Time.deltaTime* 40);
         foreach (var item in vehicles)
@@ -130,39 +124,42 @@ public class Train : WorldObject
                 locationPoints.Enqueue(track.points[i]);
             }      
         }
-        debug_locationPoints =locationPoints.ToArray();
         int maxlenght = (int)(1.1 * Lenght*PointCreator.pointsPerUnit); 
         for (int i = maxlenght; i < locationPoints.Count; i++)
         {
             locationPoints.Dequeue();
         }
     }
+
     void drive(float distance){
-        if (indexTrack==track.points.Length-1 && TrackDirection || indexTrack==0 && !TrackDirection){
-            if(path.Count == 0){
-                //bool a= findPath();
+        if (indexTrack==track.points.Length-1 && TrackDirection){
+            WayPoint wp = track.WayPointEnd;
+            track = wp.nextTrack(track);
+            if(wp == track.WayPointBegin){
+                indexTrack = 0;
+                TrackDirection = true;
+            }else{
+                indexTrack = track.points.Length-1;
+                TrackDirection = false;
             }
-            if (path.Count==0){
-                return;
-            }
-            track = path[0].Item1;
-            TrackDirection = path[0].Item2;
-            if (TrackDirection)
-            {
-                indexTrack =0;
-            }
-            else
-            {
-                indexTrack=track.points.Length-1;
-            }
-            path.RemoveAt(0);
-            /*_path  = new List<Track>();
-            foreach(var item in path)
-            {
-                _path.Add(item.Item1);
-            }*/
+            drive(distance);
+            return;
         }
-        if (distance<0.1){
+
+        if (indexTrack==0 && !TrackDirection){
+            WayPoint wp = track.WayPointBegin;
+            track = wp.nextTrack(track);
+            if(wp == track.WayPointBegin){
+                indexTrack = 0;
+                TrackDirection = true;
+            }else{
+                indexTrack = track.points.Length-1;
+                TrackDirection = false;
+            }
+            drive(distance);
+            return;
+        }
+        if (distance<0.001){
             return;
         }
         if (TrackDirection){
@@ -172,28 +169,29 @@ public class Train : WorldObject
                 locationPointsUpdate(indexTrack,track.points.Length-1);
                 indexTrack=track.points.Length-1;
                 drive((PointsToGo-pointsLeftInTrack)/PointCreator.pointsPerUnit);
+                return;
             }else{
                 pointsLeftInTrack -= PointsToGo;
                 locationPointsUpdate(indexTrack, track.points.Length -pointsLeftInTrack);
                 indexTrack = track.points.Length -pointsLeftInTrack;
             }
+            return;
         }else{
             int PointsToGo = (int) (PointCreator.pointsPerUnit * distance);
             int pointsLeftInTrack = indexTrack;
             if (PointsToGo>=pointsLeftInTrack){
                 locationPointsUpdate(indexTrack,0);
-
-
                 indexTrack=0;
                 drive((PointsToGo+pointsLeftInTrack-track.points.Length)/PointCreator.pointsPerUnit);
+                return;
             }else{
                 pointsLeftInTrack -= PointsToGo;
                 locationPointsUpdate(indexTrack, pointsLeftInTrack);
                 indexTrack = pointsLeftInTrack;
             }
+            return;
         }   
     }
-
 
     /*bool findPath(){
         HashSet<(Vector2,float)> toCalc = new HashSet<(Vector2,float)>();
