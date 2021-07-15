@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="MainMenue.uss" />
+    <ui:VisualElement focusable="false" style="background-color: rgb(25, 42, 86); justify-content: space-around;">
+        <ui:Button text="New Game&#10;" display-tooltip-when-elided="true" focusable="true" name="newGameButton" class="unity-button" />
+        <ui:Button text="Load&#10;" display-tooltip-when-elided="true" name="loadButton" />
+        <ui:Button text="Exit Game&#10;" display-tooltip-when-elided="true" name="exitButton" />
+        <ui:Button text="Continue&#10;" display-tooltip-when-elided="true" name="continueButton" />
+    </ui:VisualElement>
+</ui:UXML>

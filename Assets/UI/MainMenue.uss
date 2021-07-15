@@ -1,0 +1,25 @@
+VisualElement {
+    position: absolute;
+    left: 40%;
+    right: 40%;
+    top: 23%;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.unity-button {
+    color: rgb(0, 0, 0);
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(220, 221, 225);
+    font-size: 55px;
+    -unity-font: resource('FlatSkin/Font/Roboto-Bold');
+    -unity-font-style: normal;
+    width: 95%;
+    height: 20%;
+}
+
+.unity-button:active {
+    color: rgb(0, 0, 0);
+    background-color: rgb(127, 143, 166);
+}
